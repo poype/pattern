@@ -1,0 +1,52 @@
+模板方法模式：在基类中定义了一个操作的算法的骨架，但将操作过程中的某个环节的具体实现延迟到子类中。
+当我们要完成一个固定过程或一系列步骤，但是某些个别步骤上的实现不同，可以考虑使用模板方法模式处理。
+将通用的算法过程放到基类中，而算法过程中依赖的某些具体步骤的实现放到子类中。
+
+例子：
+InputStream是一个抽象类，其中的read方法是一个抽象方法。
+InputStream中有几个非抽象方法都依赖这个抽象的read方法，例如：
+    public int read(byte b[], int off, int len) throws IOException {
+        if (b == null) {
+            throw new NullPointerException();
+        } else if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return 0;
+        }
+
+        int c = read();
+        if (c == -1) {
+            return -1;
+        }
+        b[off] = (byte)c;
+
+        int i = 1;
+        try {
+            for (; i < len ; i++) {
+                c = read(); // 依赖抽象的read方法
+                if (c == -1) {
+                    break;
+                }
+                b[off + i] = (byte)c;
+            }
+        } catch (IOException ee) {
+        }
+        return i;
+    }
+抽象read方法的具体实现将在InputStream的子类中实现。
+
+再如在AbstractList类中定义了多个抽象方法，get方法是其中之一，它的许多非抽象方法都依赖抽象的get方法。例如：
+public E next() {
+    checkForComodification();
+    try {
+        int i = cursor;
+        E next = get(i); // 依赖抽象的get方法
+        lastRet = i;
+        cursor = i + 1;
+        return next;
+    } catch (IndexOutOfBoundsException e) {
+        checkForComodification();
+        throw new NoSuchElementException();
+    }
+}
+get方法将在具体的List中实现，但是在AbstractList类中定义了完整的算法族，如这里的遍历元素。
